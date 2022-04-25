@@ -37,9 +37,13 @@ jobs:
       run : echo "Deploy pakcage name is ${{ env.DEPLOY_PACKAGE_NAME }}"
     
     - name: Deploy to server :)
-      run : |
-           pwd
-           ls -la
+      run : exit 1
+   
+    - name: Step To run on failure
+      if: ${{ failure() }}
+             run:|
+                 echo 'last job failed'
+                 curl -X POST https://api.telegram.org/bot${{ secrets.TOKEN }}/sendMessage -d "chat_id=1108837141" -d text="Deploy unsuccessful"
            
   my_notification:
       runs-on: ubuntu-latest
