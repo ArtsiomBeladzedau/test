@@ -1,36 +1,50 @@
-# This is a basic workflow to help you get started with Actions
+name: My-GitHubActions-Basics
+env:
+  APPLICATION_NAME    : "MyWordpress"
+  DEPLOY_PACKAGE_NAME : "Wordpress-deploy-ver-${{ github.sha }}"
 
-name: CI
-
-# Controls when the workflow will run
-on:
-  # Triggers the workflow on push or pull request events but only for the master branch
+on: 
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    branches: 
+      - master
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch: testwork
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+  my_ci:
+    runs-on: test
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@master
-
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: pwd
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+    - name: Print Hello Message in Testing
+      run : echo "Hello World from Testing job"
+    
+    - name: Execure few commands
+      run : |
+        echo "Hello Message"
+        echo "Appication name: ${{ env.APPLICATION_NAME }}"
+    
+    - name: List current folder
+      run : pwd
+   
+    - name: Git clone my repo
+      uses: actions/checkout@v1   
+          
+  my_cd:
+    runs-on: test
+    needs: [my_ci]
+#    if: github == 'refs/heads/master' && github.event_name == 'push' 
+       
+    steps:        
+    - name: Printing Deployment package
+      run : echo "Deploy pakcage name is ${{ env.DEPLOY_PACKAGE_NAME }}"
+    
+    - name: Deploy to server :)
+      run : |
+           pwd
+           ls -la
+           
+  my_notification:
+      runs-on: test
+      needs: [my_cd]
+       
+      steps:        
+      - name: Deploy notification
+        run : curl -X POST https://api.telegram.org/bot${{ secrets.TOKEN }}/sendMessage -d "chat_id=1108837141" -d text="Deploy successful"
